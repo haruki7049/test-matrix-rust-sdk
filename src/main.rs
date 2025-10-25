@@ -20,8 +20,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             Ok(())
         })
         .initial_device_display_name("test-matrix-rust-sdk")
-        .await
-        .unwrap();
+        .await?;
 
     println!("Successed to receive callback. Finished to log in.");
 
