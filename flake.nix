@@ -41,6 +41,7 @@
           src = lib.cleanSource ./.;
           buildInputs = [
             pkgs.openssl
+            pkgs.sqlite
           ];
           nativeBuildInputs = [
             # Build tools
