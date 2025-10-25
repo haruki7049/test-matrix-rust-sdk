@@ -1,0 +1,10 @@
+[package]
+name = "test-matrix-rust-sdk"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+matrix-sdk = { version = "0.14.0", features = ["sso-login"] }
+tokio = { version = "1", features = ["full"] }
+url = "2"
+#tiny_http = "0.12"
