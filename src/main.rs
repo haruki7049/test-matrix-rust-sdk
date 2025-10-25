@@ -1,7 +1,4 @@
-use matrix_sdk::{
-    Client,
-    ruma::UserId,
-};
+use matrix_sdk::{Client, ruma::UserId};
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
