@@ -1,4 +1,8 @@
-use matrix_sdk::{Client, ruma::UserId};
+use matrix_sdk::{
+    Client,
+    encryption::{Encryption, identities::UserIdentity, verification::VerificationRequest},
+    ruma::UserId,
+};
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -56,5 +60,11 @@ async fn mainloop(client: Client) -> Result<(), Box<dyn std::error::Error>> {
 }
 
 async fn encrypt(client: &Client) -> Result<(), Box<dyn std::error::Error>> {
+    let user_id: &UserId = client.user_id().ok_or("The UserId is None")?;
+    let encryption: Encryption = client.encryption();
+    let user_identity: UserIdentity = encryption.request_user_identity(user_id).await?.ok_or("user_identity is None")?;
+
+    user_identity.verify().await?;
+
     Ok(())
 }
