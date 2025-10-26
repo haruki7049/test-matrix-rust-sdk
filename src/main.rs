@@ -1,8 +1,8 @@
 use clap::Parser;
 use matrix_sdk::{
-    Client,
+    AuthSession, Client,
     encryption::{Encryption, identities::UserIdentity, verification::VerificationRequest},
-    ruma::UserId,
+    ruma::{DeviceId, UserId},
 };
 use std::sync::OnceLock;
 use test_matrix_rust_sdk::{DEVICE_NAME, cli::CLIArgs, config::Configuration};
@@ -62,22 +62,50 @@ async fn login(
         .build()
         .await?;
 
-    let response = client
-        .matrix_auth()
-        .login_sso(|sso_url| async move {
-            // Open sso_url
-            info!("Access this URL to log in: {}", sso_url);
-            Ok(())
-        })
-        .initial_device_display_name(device_name)
-        .await?;
+    let config: &Configuration = CONFIGURATION.get().expect("CONFIGURATION is None");
 
-    info!("Successed to receive callback. Finished to log in.");
+    if config.matrix_session().is_none() {
+        // Matrix Auth
+        let response = client
+            .matrix_auth()
+            .login_sso(|sso_url| async move {
+                // Open sso_url
+                info!("Access this URL to log in: {}", sso_url);
+                Ok(())
+            })
+            .initial_device_display_name(device_name)
+            .await?;
 
-    info!(
-        "Logged in as {}, got device_id {} and access_token {}",
-        response.user_id, response.device_id, response.access_token,
-    );
+        info!("Successed to receive callback. Finished to log in.");
+
+        info!(
+            "Logged in as {}, got device_id {} and access_token {}",
+            response.user_id, response.device_id, response.access_token,
+        );
+    } else {
+        // Restore Session
+        let session: AuthSession = config.matrix_session().unwrap().into();
+        client.restore_session(session).await?;
+
+        let user_id: Option<&UserId> = client.user_id();
+        let device_id: Option<&DeviceId> = client.device_id();
+        let access_token: Option<String> = client.access_token();
+
+        match user_id {
+            None => info!("user_id is None"),
+            Some(id) => info!("user_id is {id}"),
+        }
+
+        match device_id {
+            None => info!("device_id is None"),
+            Some(id) => info!("device_id is {id}"),
+        }
+
+        match access_token {
+            None => info!("access_token is None"),
+            Some(token) => info!("access_token is {token}"),
+        }
+    }
 
     Ok(client)
 }
